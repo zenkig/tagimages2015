@@ -1,0 +1,466 @@
+<html>
+    <head>
+        <title>Image Tagging with jQuery and PHP</title>
+        <link href="jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="css/jquery.hotspot.css">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">
+
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="jquery-ui.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/modernizr.custom.49511.js"></script>
+        <script type="text/javascript" src="js/jquery.hotspot.min.js"></script>
+        <style type="text/css" >
+
+            body{
+                font-size:14px;
+                font-family:"Arial";
+            }
+
+            /* define the tagging area.*/
+            #mapper{
+                border:3px solid #A5DF00;
+                width:50px;
+                height:50px;
+                min-width:50px;
+                min-height:50px;
+                z-index:1000;
+                position:absolute;
+                top:0;
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+                display:none;
+            }
+
+            #ImageContainer div{
+
+                display:block;
+                position:absolute;
+                /*It is used to keep the tagged sections. When a tag is created on the main image a small div will be created and appended to this ImageContainer section.*/
+            }
+
+
+            #main_panel{
+                margin: auto;
+                padding: 10px;
+                width: 1000px;
+            }
+
+            #url_panel{
+
+            }
+
+            #form_panel{
+                position: absolute;
+                /*float: left;*/
+                z-index:2000;
+                opacity: 0.7;
+                left:150px;
+                top: 40px;
+                display: none;
+                width: 400px;
+                height: 150px;
+                padding: 5px;
+                text-align: left;
+                white-space: normal;
+                background-color: #ffffff;
+                border: 1px solid #ccc;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                -webkit-border-radius: 6px;
+                -moz-border-radius: 6px;
+                border-radius: 6px;
+                -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+                -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+                -webkit-background-clip: padding-box;
+                -moz-background-clip: padding;
+                background-clip: padding-box;
+            }
+
+            #form_panel input,textarea{
+                padding:3px;
+                background:#FFF;
+                border:1px solid #A5DF00;
+                color:#000;
+                /*It used to create title of tags. When a tag is created it will popup and request for tag name. Once created it will hide.*/
+            }
+
+            #image_panel {
+                float:left;
+                width:900px;
+                margin: auto;
+                position:relative; /*positioned relative to the main_panel*/
+            }
+
+            #image_panel img{
+                left:0;
+                top:-102px;
+                -webkit-border-radius: 6px;
+                -moz-border-radius: 6px;
+                border-radius: 6px;
+                max-width: 900px;
+                overflow: hidden;
+
+            }
+
+            #form_panel .label{
+                float:left;
+                width:80px;
+                padding:5px;
+            }
+
+            #form_panel .label-content{
+                float:left;
+                width:80px;
+                padding:5px;
+            }
+
+            #form_panel .field{
+                float:left;
+                width:200px;
+                padding:5px;
+            }
+
+            #form_panel .row{
+                clear:both;
+            }
+
+            .tagged_title{
+                background: none repeat scroll 0 0 #538DD3;
+                border: 2px solid;
+                color: #FFFFFF;
+                font-size: 12px;
+                font-weight: bold;
+                padding: 3px;
+                margin-top:5px;
+            }
+
+            .tagged_content{
+                background: none repeat scroll 0 0 #538DD3;
+                border: 2px solid;
+                color: #FFFFFF;
+                font-size: 12px;
+                font-weight: normal;
+                padding: 3px;
+                margin-top:5px;
+            }
+
+
+            #info_panel{
+                padding:10px;
+                margin:20px 0;
+                background:#eee;
+            }
+
+            #tagged2 {
+                width:pos_width;
+                height:pos_height;
+                left:pos_x;
+                top:pos_y;
+            }
+
+            #tagged_box2 {
+                width: pos_width;
+                height: pos_height;
+                display: none;
+            }
+
+            input[type='button']{
+                background: none repeat scroll 0 0 #2769C4;
+                border: 1px solid #CFCFCF;
+                color: #FFFFFF;
+                font-weight: bold;
+                height: 30px;
+                padding: 5px;
+            }
+
+        </style>
+
+
+        <script>
+            $(document).ready(function() {
+                
+
+
+                $("#imageMap").click(function(e){
+
+
+                    var image_left = $(this).offset().left;
+                    var click_left = e.pageX;
+                    var left_distance = click_left - image_left;
+
+                    var image_top = $(this).offset().top;
+                    var click_top = e.pageY;
+                    var top_distance = click_top - image_top;
+
+                    var mapper_width = $('#mapper').width();
+                    var imagemap_width = $('#imageMap').width();
+
+                    var mapper_height = $('#mapper').height();
+                    var imagemap_height = $('#imageMap').height();
+
+
+
+                    if((top_distance + mapper_height > imagemap_height) && (left_distance + mapper_width > imagemap_width)){
+                        $('#mapper').css("left", (click_left - mapper_width - image_left  ))
+                        .css("top",(click_top - mapper_height - image_top  ))
+                        .css("width","25px")
+                        .css("height","25px")
+                        .show();
+                    }
+                    else if(left_distance + mapper_width > imagemap_width){
+
+
+                        $('#mapper').css("left", (click_left - mapper_width - image_left  ))
+                        .css("top",top_distance)
+                        .css("width","25px")
+                        .css("height","25px")
+                        .show();
+			
+                    }
+                    else if(top_distance + mapper_height > imagemap_height){
+                        $('#mapper').css("left", left_distance)
+                        .css("top",(click_top - mapper_height - image_top  ))
+                        .css("width","25px")
+                        .css("height","25px")
+                        .show();
+                    }
+                    else{
+
+
+                        $('#mapper').css("left",left_distance)
+                        .css("top",top_distance)
+                        .css("width","25px")
+                        .css("height","25px")
+                        .show();
+                    }
+
+
+                    $("#mapper").resizable({ containment: "parent" });
+                    $("#mapper").draggable({ containment: "parent" });
+                    
+                });
+
+
+            });
+
+
+
+
+            $(".tagged").live("mouseover",function(){
+                if($(this).find(".openDialog").length == 0){
+                    $(this).find(".tagged_box").css("display","block");
+                    $(this).css("border","5px solid #EEE");
+
+                    $(this).find(".tagged_title").css("display","block");
+                    $(this).find(".tagged_content").css("display","block");
+                }
+			
+
+            });
+
+            $(".tagged").live("mouseout",function(){
+                if($(this).find(".openDialog").length == 0){
+                    $(this).find(".tagged_box").css("display","block");
+                    $(this).css("border","none");
+                    $(this).find(".tagged_title").css("display","block");
+                    $(this).find(".tagged_content").css("display","block");
+                }
+			
+
+            });
+
+            $(".tagged").live("click",function(){
+                $(this).find(".tagged_box").html(
+                        "<img src='delete.png' width='25' height ='25' alt = '24*24' class='openDialog' value='Delete' onclick='deleteTag(this)' />\n\
+                         <img src='save.png' onclick='editTag(this);' value='Save' />");
+
+                var img_scope_top = $("#imageMap").offset().top + $("#imageMap").height() - $(this).find(".tagged_box").height();
+                var img_scope_left = $("#imageMap").offset().left + $("#imageMap").width() - $(this).find(".tagged_box").width();
+
+                $(this).draggable({ containment:[$("#imageMap").offset().left,$("#imageMap").offset().top,img_scope_left,img_scope_top]  });
+
+            });
+
+            var addTag = function(){
+                var position = $('#mapper').position();
+                var pos_x = position.left;
+                var pos_y = position.top;
+                var pos_width = $('#mapper').width();
+                var pos_height = $('#mapper').height();
+
+
+                $('#ImageContainer').append(
+                        '<div class="tagged"  style="width:'+pos_width+';height:'+
+                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
+                        '<div   class="tagged_box" style="width:'+pos_width+';height:'+
+                            pos_height+';display:none;" ></div>'+
+                        '<div class="tagged_title" style="top:'+(pos_height+5)+';display:block;" >'+
+                         $("#title").val()+'</div>'+
+                        '<div class="tagged_content" style="top:'+(pos_height+30)+';display:block;" >'+
+                         $("#content").val()+'</div>'+
+                        '</div>');
+
+
+                $("#mapper").hide();
+                $("#title").val('');
+                $("#content").val('');
+                $("#form_panel").hide();
+
+            };
+
+            var openDialog = function(){
+                $("#form_panel").fadeIn("slow");
+            };
+
+            var showTags = function(){
+                $(".tagged_box").css("display","block");
+                $(".tagged").css("border","5px solid #EEE");
+                $(".tagged_title").css("display","block");
+                $(".tagged_content").css("display","block");
+            };
+
+            var hideTags = function(){
+                $(".tagged_box").css("display","none");
+                $(".tagged").css("border","none");
+                $(".tagged_title").css("display","none");
+                $(".tagged_content").css("display","none");
+            };
+		
+            var editTag = function(obj){
+                $(obj).parent().parent().draggable( 'disable' );
+                $(obj).parent().parent().removeAttr( 'class' );
+                $(obj).parent().parent().addClass( 'tagged' );
+                $(obj).parent().parent().css("border","none");
+                $(obj).parent().css("display","none");
+                $(obj).parent().parent().find(".tagged_title").css("display","block");
+                $(obj).parent().html('');
+            };
+
+            var deleteTag = function(obj){
+                $(obj).parent().parent().remove();
+            };
+
+
+        </script>
+    </head>
+
+
+    <body>
+        <div class="row clearfix" id="pagetitle">
+            <div class="col-md-12 column">
+                <h3>
+                    CSCW
+                </h3>
+            </div>
+        </div>
+
+        <div id='main_panel'>
+
+             <div style='margin: auto; width: 900px;'>
+                <div id='image_panel' >
+                    <img src='gou.jpg' id='imageMap'  />
+                    <div id='mapper' ><img src='save.png' onclick='openDialog()' /></div>
+
+                    <div id="ImageContainer">
+                    </div>
+
+                    <!--<div id='form_panel'>-->
+                        <!--<div class='row'>-->
+                            <!--<div class='label-content'>Title</div><div class='field'><input type='text' id='title' /></div>-->
+                        <!--</div>-->
+                        <!--<div class='row'>-->
+                            <!--<div class='label-content'>Content</div><div class='field'><input type='text' id='content' /></div>-->
+                        <!--</div>-->
+                            <!--<div class='row'>-->
+                                <!--<div class="field">-->
+                                    <!--<button type="button" class="btn btn-sm" value='Add Tag' onclick='addTag()'>Add tag</button>-->
+                                <!--</div>-->
+                             <!--</div>-->
+
+                    <!--</div>-->
+
+                    <form class="form-horizontal" role="form" id='form_panel'>
+                        <div class="form-group">
+                            <label for="title" class="col-sm-2 control-label">Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="title" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="content" class="col-sm-2 control-label">Content</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="content" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-default" value='Add Tag' onclick='addTag()'>Add Tag</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <div style="background: none repeat scroll 0 0 #E6E6E6;
+                 border: 1px solid #AEAEAE;
+                 clear: both;
+                 margin: 20px auto;
+                 padding: 20px 0;
+                 border: 1px solid #ccc;
+                 -webkit-border-radius: 6px;
+                 -moz-border-radius: 6px;
+                 border-radius: 6px;
+                 text-align: center;
+                 width: 900px;">
+                <div class="row clearfix">
+                    <div class="col-md-10 column">
+                            <button class="btn btn-default" type="button" value="Show Tags" onclick="showTags()" >
+                                Show Tags</button>
+                            <button class="btn btn-danger" type="button" value="Hide Tags" onclick="hideTags()">
+                                Hide Tags</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!--This is the part for uploading image update-->
+        <div class="container">
+            <div class="row clearfix">
+                <div class="col-md-6 column">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Email address</label><input type="email" class="form-control" id="exampleInputEmail1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Password</label><input type="password" class="form-control" id="exampleInputPassword1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputFile">Image upload</label><input type="file" id="exampleInputFile" />
+                            <p class="help-block">Example block-level help text here.</p>
+                        </div>
+                       <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                </div>
+                <div class="col-md-6 column">
+                </div>
+            </div>
+        </div>
+
+
+    </body>
+</html>
+
+
+
+
+
+
+
