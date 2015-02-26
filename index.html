@@ -296,10 +296,17 @@
                 var pos_width = $('#mapper').width();
                 var pos_height = $('#mapper').height();
 
-                if (client) {
+                // emit all the message to server in here 
+                if (client) { 
                       client.emit('msg', {
-                        from: $('#title').val(), 
-                        msg: $('#content').val()
+                        from:  $('#name').val(), 
+                        titl: $('#title').val(), 
+                        msg: $('#content').val(),
+                        position: $('#mapper').position(),
+                        pos_x: position.left,
+                        pos_y: position.top,
+                        pos_width: $('#mapper').width(),
+                        pos_height: $('#mapper').height()
                     }); 
 
                 $('#ImageContainer').append(
@@ -376,26 +383,20 @@
 
         // Handler when user joins
         client.on('hello', function(name) {
-            $('#connectinfo').append('<p style="color:green">'+name+' joined</p>');
+            $('#connectinfo').append('<p style="color:green">'+ name+' joined</p>');
         });
 
-        // Handler when user sends message
+        // Handler when user sends tag image message
         client.on('msg', function(data) {
-            // $('#title').append('<p>'+data.from+': '+data.msg+'</p>');
-                var position = $('#mapper').position();
-                var pos_x = position.left;
-                var pos_y = position.top;
-                var pos_width = $('#mapper').width();
-                var pos_height = $('#mapper').height();
 
                 $('#ImageContainer').append(
-                        '<div class="tagged"  style="width:'+pos_width+';height:'+
-                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
-                        '<div   class="tagged_box" style="width:'+pos_width+';height:'+
-                            pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(pos_height+5)+';display:block;" >'+
-                         data.from+'</div>'+
-                        '<div class="tagged_content" style="top:'+(pos_height+30)+';display:block;" >'+
+                        '<div class="tagged"  style="width:'+data.pos_width+';height:'+
+                            data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
+                        '<div   class="tagged_box" style="width:'+ data.pos_width+';height:'+
+                            data.pos_height+';display:none;" ></div>'+
+                        '<div class="tagged_title" style="top:'+(data.pos_height+5)+';display:block;" >'+
+                         data.titl+'</div>'+
+                        '<div class="tagged_content" style="top:'+(data.pos_height+30)+';display:block;" >'+
                          data.msg+'</div>'+
                         '</div>');
 
@@ -420,16 +421,31 @@
  <body>
         <div class="row clearfix" id="pagetitle">
             <div class="col-md-12 column">
-                <h3>
-                    C S C W 2015
-                </h3>
+                <h2 class="text-center">
+                    C S C W 2015 spring</br>
+                    interactive tagging on images 
+                </h2>
             </div>
 
-            <h2>Login to comment</h2>
-            <p>Your name: <input id="name" type="text"/>
-            <button onclick='connect()'>Connect</button></p>
+        <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="row clearfix">
+                <div class="col-md-4 column">
+                    <h3 class="text-center text-primary">
+                        connect with friends to comment 
+                    </h3>
+                </div>
+                <div class="col-md-4 column">
+                     <p> <b>Your Name: </b> <input id="name" type="text"/></p>
+                     <button type="button" class="btn btn-primary btn-block" onclick='connect()'>Connect</button> 
+                </div>
+                <div class="col-md-4 column">
+                </div>
+            </div>
+        </div>
         </div>
 
+        </div>
 
 
 
@@ -505,6 +521,9 @@
 
         </div>
 
+        <!-- infomation panel to show system status -->
+        <div id='connectinfo'></div>
+
 
         <!--This is the part for uploading image update-->
         <div class="container">
@@ -528,8 +547,6 @@
                 </div>
             </div>
         </div>
-
-        <div id='connectinfo'></div>
 
     </body>
 </html>
