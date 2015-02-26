@@ -23,6 +23,21 @@ io.on('connection', function(client) {
 	client.on('disconnect', function() {
 		console.log('A user disconnected');
 	});
+
+	// Listen to client actions or taggings
+	client.on('hello', function(name) {
+		console.log(name, 'joined');
+		user = name;
+		// Broadcast to others
+		client.broadcast.emit('hello', name);
+	});
+	
+	client.on('msg', function(data) {
+		console.log(data);
+		// Broadcast to others
+		client.broadcast.emit('msg', data);
+	});
+
 });
 
 // Start the server (NOTE: user http.listen, NOT app.listen!!)

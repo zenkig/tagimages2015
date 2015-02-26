@@ -189,11 +189,12 @@
 
 <!-- THE major script controller part starts here -->
         <script>
+
+        var client = null;  // socket connection to server
+
             $(document).ready(function() {
-                
 
                 $("#imageMap").click(function(e){
-
 
                     var image_left = $(this).offset().left;
                     var click_left = e.pageX;
@@ -220,7 +221,6 @@
                     }
                     else if(left_distance + mapper_width > imagemap_width){
 
-
                         $('#mapper').css("left", (click_left - mapper_width - image_left  ))
                         .css("top",top_distance)
                         .css("width","25px")
@@ -236,7 +236,6 @@
                         .show();
                     }
                     else{
-
 
                         $('#mapper').css("left",left_distance)
                         .css("top",top_distance)
@@ -288,6 +287,8 @@
 
             });
 
+
+            //add a TAG on the iamge
             var addTag = function(){
                 var position = $('#mapper').position();
                 var pos_x = position.left;
@@ -295,6 +296,11 @@
                 var pos_width = $('#mapper').width();
                 var pos_height = $('#mapper').height();
 
+                if (client) {
+                      client.emit('msg', {
+                        from: $('#title').val(), 
+                        msg: $('#content').val()
+                    }); 
 
                 $('#ImageContainer').append(
                         '<div class="tagged"  style="width:'+pos_width+';height:'+
@@ -307,11 +313,12 @@
                          $("#content").val()+'</div>'+
                         '</div>');
 
-
                 $("#mapper").hide();
                 $("#title").val('');
                 $("#content").val('');
                 $("#form_panel").hide();
+
+                }
 
             };
 
@@ -350,6 +357,10 @@
 
     // connect function for node.js 
     function connect() {
+
+        if (client)
+            return; // already connected
+
         $('#connectinfo').append('<p>Connecting to Node server</p>');
         client = io();
 
@@ -362,13 +373,51 @@
         client.on('disconnect', function() {
             $('#connectinfo').append('<p>Disconnected from Node server</p>');
         });
+
+        // Handler when user joins
+        client.on('hello', function(name) {
+            $('#connectinfo').append('<p style="color:green">'+name+' joined</p>');
+        });
+
+        // Handler when user sends message
+        client.on('msg', function(data) {
+            // $('#title').append('<p>'+data.from+': '+data.msg+'</p>');
+                var position = $('#mapper').position();
+                var pos_x = position.left;
+                var pos_y = position.top;
+                var pos_width = $('#mapper').width();
+                var pos_height = $('#mapper').height();
+
+                $('#ImageContainer').append(
+                        '<div class="tagged"  style="width:'+pos_width+';height:'+
+                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
+                        '<div   class="tagged_box" style="width:'+pos_width+';height:'+
+                            pos_height+';display:none;" ></div>'+
+                        '<div class="tagged_title" style="top:'+(pos_height+5)+';display:block;" >'+
+                         data.from+'</div>'+
+                        '<div class="tagged_content" style="top:'+(pos_height+30)+';display:block;" >'+
+                         data.msg+'</div>'+
+                        '</div>');
+
+                $("#mapper").hide();
+                $("#title").val('');
+                $("#content").val('');
+                $("#form_panel").hide();
+        });
+
+        // Handler when user leaves
+        client.on('bye', function(name) {
+            $('#connectinfo').append('<p style="color:red">'+name+' has left</p>');
+        });
+
     } 
 
         </script>
     </head>
 
 
-    <body>
+<!--     <body onload='connect()'>   -->    
+ <body>
         <div class="row clearfix" id="pagetitle">
             <div class="col-md-12 column">
                 <h3>
@@ -376,7 +425,9 @@
                 </h3>
             </div>
 
-        <div id='connectinfo'></div>
+            <h2>Login to comment</h2>
+            <p>Your name: <input id="name" type="text"/>
+            <button onclick='connect()'>Connect</button></p>
         </div>
 
 
@@ -404,7 +455,6 @@
                                     <!--<button type="button" class="btn btn-sm" value='Add Tag' onclick='addTag()'>Add tag</button>-->
                                 <!--</div>-->
                              <!--</div>-->
-
                     <!--</div>-->
 
                     <form class="form-horizontal" role="form" id='form_panel'>
@@ -479,6 +529,7 @@
             </div>
         </div>
 
+        <div id='connectinfo'></div>
 
     </body>
 </html>
