@@ -11,6 +11,8 @@
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/modernizr.custom.49511.js"></script>
         <script type="text/javascript" src="js/jquery.hotspot.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+
         <style type="text/css" >
 
             body{
@@ -176,13 +178,19 @@
                 padding: 5px;
             }
 
+            #connectinfo {
+                color: #A5DF00;
+                background-color: #ececea;
+                font-weight: bold;
+                border: 1px solid #CFCFCF;
+            }
+
         </style>
 
-
+<!-- THE major script controller part starts here -->
         <script>
             $(document).ready(function() {
                 
-
 
                 $("#imageMap").click(function(e){
 
@@ -243,10 +251,7 @@
                     
                 });
 
-
             });
-
-
 
 
             $(".tagged").live("mouseover",function(){
@@ -269,7 +274,6 @@
                     $(this).find(".tagged_content").css("display","block");
                 }
 			
-
             });
 
             $(".tagged").live("click",function(){
@@ -344,6 +348,22 @@
             };
 
 
+    // connect function for node.js 
+    function connect() {
+        $('#connectinfo').append('<p>Connecting to Node server</p>');
+        client = io();
+
+        // Handler when connected
+        client.on('connect', function() {
+            $('#connectinfo').append('<p>Connected to Node server, you can tag on images now</p>');
+        });
+
+        // Handler when lost connection
+        client.on('disconnect', function() {
+            $('#connectinfo').append('<p>Disconnected from Node server</p>');
+        });
+    } 
+
         </script>
     </head>
 
@@ -352,10 +372,15 @@
         <div class="row clearfix" id="pagetitle">
             <div class="col-md-12 column">
                 <h3>
-                    CSCW
+                    C S C W 2015
                 </h3>
             </div>
+
+        <div id='connectinfo'></div>
         </div>
+
+
+
 
         <div id='main_panel'>
 
