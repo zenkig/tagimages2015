@@ -18,31 +18,33 @@ app.use('/', express.static(__dirname + '/tagimages2015'));
 // Listen to socket connections
 io.on('connection', function(client) {
 	console.log('A user connected');
+	var user = 'unknown';
 
 	// Listen to disconnections
 	client.on('disconnect', function() {
 		console.log('A user disconnected');
+	io.emit('bye', user);
 	});
 
 	// Listen to client actions or taggings
 	client.on('hello', function(name) {
-		console.log(name, 'joined');
+		console.log(name, 'just joined');
 		user = name;
 		// Broadcast to others
 		client.broadcast.emit('hello', name);
 	});
 	
 	client.on('msg', function(data) {
-        console.log(data);
-        // Broadcast to others
-        client.broadcast.emit('msg', data);
-    });
+		console.log(data);
+		// Broadcast to others
+		client.broadcast.emit('msg', data);
+	});
 
-    client.on('del', function(data) {
-        console.log(data);
-        // Broadcast to others
-        client.broadcast.emit('del', data);
-    });
+	client.on('del', function(data) {
+		console.log(data);
+		// Broadcast to others
+		client.broadcast.emit('del', data);
+	});
 
 });
 

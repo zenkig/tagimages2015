@@ -23,8 +23,8 @@
             /* define the tagging area.*/
             #mapper{
                 border:3px solid #A5DF00;
-                width:50px;
-                height:50px;
+                width:60px;
+                height:60px;
                 min-width:50px;
                 min-height:50px;
                 z-index:1000;
@@ -42,7 +42,6 @@
                 position:absolute;
                 /*It is used to keep the tagged sections. When a tag is created on the main image a small div will be created and appended to this ImageContainer section.*/
             }
-
 
             #main_panel{
                 margin: auto;
@@ -130,22 +129,28 @@
             }
 
             .tagged_title{
-                background: none repeat scroll 0 0 #538DD3;
-                border: 2px solid;
-                color: #FFFFFF;
-                font-size: 12px;
+                background: none repeat scroll 0 0 #ffc0cb;
+                border: 2px #f5f5f5;
+                color: #bab3b2;
+                -webkit-border-radius: 6px;
+                -moz-border-radius: 6px;
+                border-radius: 6px;
+                font-size: 13px;
                 font-weight: bold;
-                padding: 3px;
+                padding: 2px;
                 margin-top:5px;
             }
 
             .tagged_content{
-                background: none repeat scroll 0 0 #538DD3;
-                border: 2px solid;
-                color: #FFFFFF;
-                font-size: 12px;
+                background: none repeat scroll 0 0 #abe2f7;
+                border: 2px #f5f5f5;
+                -webkit-border-radius: 6px;
+                -moz-border-radius: 6px;
+                border-radius: 6px;
+                color: #bab3b2;
+                font-size: 13px;
                 font-weight: normal;
-                padding: 3px;
+                padding: 2px;
                 margin-top:5px;
             }
 
@@ -183,6 +188,20 @@
                 background-color: #ececea;
                 font-weight: bold;
                 border: 1px solid #CFCFCF;
+            }
+
+            #tagbuttons {
+                 background: none repeat scroll 0 0 #E6E6E6;
+                 border: 1px solid #AEAEAE;
+                 clear: both;
+                 margin: 20px auto;
+                 padding: 20px 0;
+                 border: 1px solid #ccc;
+                 -webkit-border-radius: 6px;
+                 -moz-border-radius: 6px;
+                 border-radius: 6px;
+                 text-align: center;
+                 width: 900px;
             }
 
         </style>
@@ -257,7 +276,6 @@
                 if($(this).find(".openDialog").length == 0){
                     $(this).find(".tagged_box").css("display","block");
                     $(this).css("border","5px solid #EEE");
-
                     $(this).find(".tagged_title").css("display","block");
                     $(this).find(".tagged_content").css("display","block");
                 }
@@ -283,7 +301,8 @@
                 var img_scope_top = $("#imageMap").offset().top + $("#imageMap").height() - $(this).find(".tagged_box").height();
                 var img_scope_left = $("#imageMap").offset().left + $("#imageMap").width() - $(this).find(".tagged_box").width();
 
-                $(this).draggable({ containment:[$("#imageMap").offset().left,$("#imageMap").offset().top,img_scope_left,img_scope_top]  });
+                $(this).draggable({ 
+                    containment:[$("#imageMap").offset().left,$("#imageMap").offset().top,img_scope_left,img_scope_top]  });
 
             });
 
@@ -358,19 +377,17 @@
             };
 
             var deleteTag = function(obj){
-                // emit all the message to server in here
+
+                // info clients online 
                 if (client) {
                     client.emit('del', {
-                        deletetag: $(obj).parent().parent().remove(),
-                        objec:$(obj)
+                        deltag: $(obj).parent().parent()
                     });
                 }
+                    $(obj).parent().parent().remove(); // locally delete the tag 
+            };
 
-                $(obj).parent().parent().remove(); // locally delete tag
-
-                };
-
-
+    var tagstyle;
     // connect function for node.js 
     function connect() {
 
@@ -383,6 +400,7 @@
         // Handler when connected
         client.on('connect', function() {
             $('#connectinfo').append('<p>Connected to Node server, you can tag on images now</p>');
+            client.emit('hello', $('#name').val() || 'unknown');
         });
 
         // Handler when lost connection
@@ -392,22 +410,20 @@
 
         // Handler when user joins
         client.on('hello', function(name) {
-            $('#connectinfo').append('<p style="color:green">'+ name+' joined</p>');
+            $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' joined</p>');
         });
 
-        // Handler when user delete tag
+        // Handler when user joins
         client.on('del', function(data) {
-            $('#ImageContainer').append(
-                    data.deletetag
-            );
-            data.objec.parent().parent().remove(); // locally delete tag
+            $('#ImageContainer').append( 
+                data.deltag.remove()
+             );
         });
 
         // Handler when user sends tag image message
         client.on('msg', function(data) {
 
-                $('#ImageContainer').append(
-                        '<div class="tagged"  style="width:'+data.pos_width+';height:'+
+            tagstyle = '<div class="tagged"  style="width:'+data.pos_width+';height:'+
                             data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
                         '<div   class="tagged_box" style="width:'+ data.pos_width+';height:'+
                             data.pos_height+';display:none;" ></div>'+
@@ -415,8 +431,9 @@
                          data.titl+'</div>'+
                         '<div class="tagged_content" style="top:'+(data.pos_height+30)+';display:block;" >'+
                          data.msg+'</div>'+
-                        '</div>');
+                        '</div>';
 
+                $('#ImageContainer').append( tagstyle );
                 $("#mapper").hide();
                 $("#title").val('');
                 $("#content").val('');
@@ -425,7 +442,7 @@
 
         // Handler when user leaves
         client.on('bye', function(name) {
-            $('#connectinfo').append('<p style="color:red">'+name+' has left</p>');
+            $('#connectinfo').append('<p style="color:#ff4162">'+ name+' has left</p>');
         });
 
     } 
@@ -438,7 +455,7 @@
  <body>
         <div class="row clearfix" id="pagetitle">
             <div class="col-md-12 column">
-                <h2 class="text-center">
+                <h2 class="text-left">
                     C S C W 2015 spring</br>
                     interactive tagging on images 
                 </h2>
@@ -448,11 +465,11 @@
         <div class="col-md-12 column">
             <div class="row clearfix">
                 <div class="col-md-4 column">
-                    <h3 class="text-center text-primary">
-                        connect with friends to comment 
-                    </h3>
                 </div>
                 <div class="col-md-4 column">
+                    <h3 class="text-left text-primary">
+                        Connect with friends to comment 
+                    </h3> 
                      <p> <b>Your Name: </b> <input id="name" type="text"/></p>
                      <button type="button" class="btn btn-primary btn-block" onclick='connect()'>Connect</button> 
                 </div>
@@ -475,20 +492,6 @@
 
                     <div id="ImageContainer">
                     </div>
-
-                    <!--<div id='form_panel'>-->
-                        <!--<div class='row'>-->
-                            <!--<div class='label-content'>Title</div><div class='field'><input type='text' id='title' /></div>-->
-                        <!--</div>-->
-                        <!--<div class='row'>-->
-                            <!--<div class='label-content'>Content</div><div class='field'><input type='text' id='content' /></div>-->
-                        <!--</div>-->
-                            <!--<div class='row'>-->
-                                <!--<div class="field">-->
-                                    <!--<button type="button" class="btn btn-sm" value='Add Tag' onclick='addTag()'>Add tag</button>-->
-                                <!--</div>-->
-                             <!--</div>-->
-                    <!--</div>-->
 
                     <form class="form-horizontal" role="form" id='form_panel'>
                         <div class="form-group">
@@ -515,25 +518,24 @@
                 </div>
             </div>
 
-            <div style="background: none repeat scroll 0 0 #E6E6E6;
-                 border: 1px solid #AEAEAE;
-                 clear: both;
-                 margin: 20px auto;
-                 padding: 20px 0;
-                 border: 1px solid #ccc;
-                 -webkit-border-radius: 6px;
-                 -moz-border-radius: 6px;
-                 border-radius: 6px;
-                 text-align: center;
-                 width: 900px;">
-                <div class="row clearfix">
-                    <div class="col-md-10 column">
-                            <button class="btn btn-default" type="button" value="Show Tags" onclick="showTags()" >
+            <div id = "tagbuttons">
+            <div class="row clearfix">
+
+                <div class="col-md-4 column">
+                </div>
+                <div class="col-md-4 column">
+                </div>
+                <div class="col-md-4 column">
+                           <button class="btn btn-default" type="button" value="Show Tags" onclick="showTags()" >
                                 Show Tags</button>
                             <button class="btn btn-danger" type="button" value="Hide Tags" onclick="hideTags()">
                                 Hide Tags</button>
-                    </div>
                 </div>
+
+                    <div class="col-md-10 column">
+                    </div>
+            </div>
+
             </div>
 
         </div>
