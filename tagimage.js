@@ -33,10 +33,16 @@ io.on('connection', function(client) {
 	});
 	
 	client.on('msg', function(data) {
-		console.log(data);
-		// Broadcast to others
-		client.broadcast.emit('msg', data);
-	});
+        console.log(data);
+        // Broadcast to others
+        client.broadcast.emit('msg', data);
+    });
+
+    client.on('del', function(data) {
+        console.log(data);
+        // Broadcast to others
+        client.broadcast.emit('del', data);
+    });
 
 });
 
