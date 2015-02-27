@@ -263,7 +263,8 @@
             $(".tagged").live("mouseover",function(){
                 if($(this).find(".openDialog").length == 0){
                     $(this).find(".tagged_box").css("display","block");
-                    $(this).css("border","5px solid #EEE");
+                    $(this).css("border","3px solid #A5DF00");
+                    $(this).css("border-radius","5px");
                     $(this).find(".tagged_title").css("display","block");
                     $(this).find(".tagged_content").css("display","block");
                 }
@@ -274,7 +275,8 @@
             $(".tagged").live("mouseout",function(){
                 if($(this).find(".openDialog").length == 0){
                     $(this).find(".tagged_box").css("display","block");
-                    $(this).css("border","none");
+                    $(this).css("border","1px dotted #BAB3B2");
+                    $(this).css("border-radius","3px");
                     $(this).find(".tagged_title").css("display","block");
                     $(this).find(".tagged_content").css("display","block");
                 }
@@ -341,7 +343,7 @@
 
             var showTags = function(){
                 $(".tagged_box").css("display","block");
-                $(".tagged").css("border","5px solid #EEE");
+                $(".tagged").css("border","4px dotted #91e374");
                 $(".tagged_title").css("display","block");
                 $(".tagged_content").css("display","block");
             };
@@ -365,24 +367,9 @@
 
             var deleteTag = function(obj){
 
-                var position = $('#mapper').position();
-                var pos_x = position.left;
-                var pos_y = position.top;
-                var pos_width = $('#mapper').width();
-                var pos_height = $('#mapper').height();
-
-                var tagstyle = '<div class="tagged"  style="width:'+pos_width+';height:'+
-                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
-                        '<div class="tagged_box" style="width:'+pos_width+';height:'+
-                            pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(pos_height)+';display:block;" >'+
-                         $("#title").val()+'</div>'+
-                        '<div class="tagged_content" style="top:'+(pos_height+26)+';display:block;" >'+
-                         $("#content").val()+'</div>'+
-                        '</div>';
                 // info clients online 
                 if (client) {
-                    client.emit('del', {
+                    client.emit('del', function(obj){
                         tagstyle: tagstyle
                     });
                 }
@@ -417,11 +404,9 @@
         // Handler when user joins
         client.on('del', function(data) {
 
-                $('#ImageContainer').remove(
-                        this.tagstyle
-                    );
-
-            // $(this).parent().parent().remove();
+            $('#ImageContainer').remove(
+                        data.tagstyle
+            );
         });
 
         // Handler when user sends tag image message
