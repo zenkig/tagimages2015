@@ -1,13 +1,14 @@
 <html>
     <head>
         <title>Image Tagging with jQuery and PHP</title>
-        <link href="jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <link href="css/jquery-ui.css" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" href="css/jquery.hotspot.css">
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/style.css" rel="stylesheet">
 
+
         <script type="text/javascript" src="js/jquery.min.js"></script>
-        <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui.min.js"></script> 
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/modernizr.custom.49511.js"></script>
         <script type="text/javascript" src="js/jquery.hotspot.min.js"></script>
@@ -25,8 +26,8 @@
                 border:3px solid #A5DF00;
                 width:60px;
                 height:60px;
-                min-width:50px;
-                min-height:50px;
+                min-width:60px;
+                min-height:60px;
                 z-index:1000;
                 position:absolute;
                 top:0;
@@ -66,7 +67,7 @@
                 padding: 5px;
                 text-align: left;
                 white-space: normal;
-                background-color: #ffffff;
+                background-color: #f5f5f5;
                 border: 1px solid #ccc;
                 border: 1px solid rgba(0, 0, 0, 0.2);
                 -webkit-border-radius: 6px;
@@ -103,7 +104,6 @@
                 border-radius: 6px;
                 max-width: 900px;
                 overflow: hidden;
-
             }
 
             #form_panel .label{
@@ -168,12 +168,6 @@
                 top:pos_y;
             }
 
-            #tagged_box2 {
-                width: pos_width;
-                height: pos_height;
-                display: none;
-            }
-
             input[type='button']{
                 background: none repeat scroll 0 0 #2769C4;
                 border: 1px solid #CFCFCF;
@@ -194,11 +188,11 @@
                  background: none repeat scroll 0 0 #E6E6E6;
                  border: 1px solid #AEAEAE;
                  clear: both;
-                 margin: 20px auto;
+                 margin: 60px auto;
                  padding: 20px 0;
                  border: 1px solid #ccc;
-                 -webkit-border-radius: 6px;
-                 -moz-border-radius: 6px;
+                 -webkit-border-radius: 5px;
+                 -moz-border-radius: 5px;
                  border-radius: 6px;
                  text-align: center;
                  width: 900px;
@@ -230,7 +224,6 @@
                     var imagemap_height = $('#imageMap').height();
 
 
-
                     if((top_distance + mapper_height > imagemap_height) && (left_distance + mapper_width > imagemap_width)){
                         $('#mapper').css("left", (click_left - mapper_width - image_left  ))
                         .css("top",(click_top - mapper_height - image_top  ))
@@ -239,13 +232,11 @@
                         .show();
                     }
                     else if(left_distance + mapper_width > imagemap_width){
-
                         $('#mapper').css("left", (click_left - mapper_width - image_left  ))
                         .css("top",top_distance)
                         .css("width","25px")
                         .css("height","25px")
                         .show();
-			
                     }
                     else if(top_distance + mapper_height > imagemap_height){
                         $('#mapper').css("left", left_distance)
@@ -255,7 +246,6 @@
                         .show();
                     }
                     else{
-
                         $('#mapper').css("left",left_distance)
                         .css("top",top_distance)
                         .css("width","25px")
@@ -263,14 +253,12 @@
                         .show();
                     }
 
-
                     $("#mapper").resizable({ containment: "parent" });
                     $("#mapper").draggable({ containment: "parent" });
                     
                 });
 
-            });
-
+            });     
 
             $(".tagged").live("mouseover",function(){
                 if($(this).find(".openDialog").length == 0){
@@ -306,7 +294,6 @@
 
             });
 
-
             //add a TAG on the iamge
             var addTag = function(){
                 var position = $('#mapper').position();
@@ -315,7 +302,17 @@
                 var pos_width = $('#mapper').width();
                 var pos_height = $('#mapper').height();
 
-                // emit all the message to server in here 
+                var tagstylelocal = '<div class="tagged"  style="width:'+pos_width+';height:'+
+                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
+                        '<div class="tagged_box" style="width:'+pos_width+';height:'+
+                            pos_height+';display:none;" ></div>'+
+                        '<div class="tagged_title" style="top:'+(pos_height)+';display:block;" >'+
+                         $("#title").val()+'</div>'+
+                        '<div class="tagged_content" style="top:'+(pos_height+26)+';display:block;" >'+
+                         $("#content").val()+'</div>'+
+                        '</div>';
+
+                // in here, we emit all the message to server  
                 if (client) { 
                       client.emit('msg', {
                         from:  $('#name').val(), 
@@ -325,26 +322,16 @@
                         pos_x: position.left,
                         pos_y: position.top,
                         pos_width: $('#mapper').width(),
-                        pos_height: $('#mapper').height()
+                        pos_height: $('#mapper').height(),
+                        tagstylelocal: tagstylelocal
                     }); 
+                  }
 
-                $('#ImageContainer').append(
-                        '<div class="tagged"  style="width:'+pos_width+';height:'+
-                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
-                        '<div   class="tagged_box" style="width:'+pos_width+';height:'+
-                            pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(pos_height+5)+';display:block;" >'+
-                         $("#title").val()+'</div>'+
-                        '<div class="tagged_content" style="top:'+(pos_height+30)+';display:block;" >'+
-                         $("#content").val()+'</div>'+
-                        '</div>');
-
+                $('#ImageContainer').append(tagstylelocal);
                 $("#mapper").hide();
                 $("#title").val('');
                 $("#content").val('');
                 $("#form_panel").hide();
-
-                }
 
             };
 
@@ -378,16 +365,30 @@
 
             var deleteTag = function(obj){
 
+                var position = $('#mapper').position();
+                var pos_x = position.left;
+                var pos_y = position.top;
+                var pos_width = $('#mapper').width();
+                var pos_height = $('#mapper').height();
+
+                var tagstyle = '<div class="tagged"  style="width:'+pos_width+';height:'+
+                            pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
+                        '<div class="tagged_box" style="width:'+pos_width+';height:'+
+                            pos_height+';display:none;" ></div>'+
+                        '<div class="tagged_title" style="top:'+(pos_height)+';display:block;" >'+
+                         $("#title").val()+'</div>'+
+                        '<div class="tagged_content" style="top:'+(pos_height+26)+';display:block;" >'+
+                         $("#content").val()+'</div>'+
+                        '</div>';
                 // info clients online 
                 if (client) {
                     client.emit('del', {
-                        deltag: $(obj).parent().parent()
+                        tagstyle: tagstyle
                     });
                 }
                     $(obj).parent().parent().remove(); // locally delete the tag 
             };
 
-    var tagstyle;
     // connect function for node.js 
     function connect() {
 
@@ -405,7 +406,7 @@
 
         // Handler when lost connection
         client.on('disconnect', function() {
-            $('#connectinfo').append('<p>Disconnected from Node server</p>');
+            $('#connectinfo').append(' <p> Disconnected from Node server </p> ');
         });
 
         // Handler when user joins
@@ -415,25 +416,28 @@
 
         // Handler when user joins
         client.on('del', function(data) {
-            $('#ImageContainer').append( 
-                data.deltag.remove()
-             );
+
+                $('#ImageContainer').remove(
+                        this.tagstyle
+                    );
+
+            // $(this).parent().parent().remove();
         });
 
         // Handler when user sends tag image message
         client.on('msg', function(data) {
 
-            tagstyle = '<div class="tagged"  style="width:'+data.pos_width+';height:'+
+            var tagstyle = '<div class="tagged"  style="width:'+data.pos_width+';height:'+
                             data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
-                        '<div   class="tagged_box" style="width:'+ data.pos_width+';height:'+
+                        '<div class="tagged_box" style="width:'+ data.pos_width+';height:'+
                             data.pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(data.pos_height+5)+';display:block;" >'+
-                         data.titl+'</div>'+
-                        '<div class="tagged_content" style="top:'+(data.pos_height+30)+';display:block;" >'+
-                         data.msg+'</div>'+
+                        '<div class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
+                            data.titl+'</div>'+
+                        '<div class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
+                            data.msg+'</div>'+
                         '</div>';
 
-                $('#ImageContainer').append( tagstyle );
+                $('#ImageContainer').append(tagstyle);
                 $("#mapper").hide();
                 $("#title").val('');
                 $("#content").val('');
@@ -442,11 +446,10 @@
 
         // Handler when user leaves
         client.on('bye', function(name) {
-            $('#connectinfo').append('<p style="color:#ff4162">'+ name+' has left</p>');
+            $('#connectinfo').append('<p style="color:#ff4162">'+ name +' has left</p>');
         });
 
     } 
-
         </script>
     </head>
 
@@ -454,14 +457,19 @@
 <!--     <body onload='connect()'>   -->    
  <body>
         <div class="row clearfix" id="pagetitle">
-            <div class="col-md-12 column">
-                <h2 class="text-left">
+            <div class="col-md-8 column">
+                <h2 class="text-left" style="color:#92b938">
                     C S C W 2015 spring</br>
                     interactive tagging on images 
                 </h2>
             </div>
 
+            <div class="col-md-4 column">
+            </div>
+        </div>
+
         <div class="row clearfix">
+
         <div class="col-md-12 column">
             <div class="row clearfix">
                 <div class="col-md-4 column">
@@ -470,13 +478,12 @@
                     <h3 class="text-left text-primary">
                         Connect with friends to comment 
                     </h3> 
-                     <p> <b>Your Name: </b> <input id="name" type="text"/></p>
+                     <p> <b>Your Name: </b> <input id="name" type="text" class="form-control"/></p>
                      <button type="button" class="btn btn-primary btn-block" onclick='connect()'>Connect</button> 
                 </div>
                 <div class="col-md-4 column">
                 </div>
             </div>
-        </div>
         </div>
 
         </div>
@@ -566,6 +573,16 @@
                 </div>
             </div>
         </div>
+
+                <div class="container">
+                    <form action="/upload" enctype="multipart/form-data" method="post">
+                        Add a title: <input name="title" type="text"/>
+                        <br><br>
+                     <input multiple="multiple" name="upload" type="file" />
+                        <br><br>
+                     <input type="submit button" value="Upload" class="btn btn-default"/>
+                    </form>
+                </div>
 
     </body>
 </html>

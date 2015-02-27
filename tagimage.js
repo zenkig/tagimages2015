@@ -9,11 +9,11 @@ var io = require('socket.io')(http);
 
 // Serve / 
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + "/tagimages2015/index.html");
+  res.sendFile(__dirname + "/index.html");
 });
 
 // Serve static pages from the html directory
-app.use('/', express.static(__dirname + '/tagimages2015'));
+app.use('/', express.static(__dirname + '/'));
 
 // Listen to socket connections
 io.on('connection', function(client) {
@@ -35,6 +35,7 @@ io.on('connection', function(client) {
 	});
 	
 	client.on('msg', function(data) {
+
 		console.log(data);
 		// Broadcast to others
 		client.broadcast.emit('msg', data);
@@ -43,7 +44,7 @@ io.on('connection', function(client) {
 	client.on('del', function(data) {
 		console.log(data);
 		// Broadcast to others
-		client.broadcast.emit('del', data);
+		client.broadcast.emit('del', data);		
 	});
 
 });
