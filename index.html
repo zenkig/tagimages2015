@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Image Tagging with jQuery and PHP</title>
+        <title>Real-time collaborative image-tagging</title>
         <link href="css/jquery-ui.css" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" href="css/jquery.hotspot.css">
         <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -47,18 +47,15 @@
             #main_panel{
                 margin: auto;
                 padding: 10px;
-                width: 1000px;
+                max-width:100%;
             }
 
-            #url_panel{
-
-            }
 
             #form_panel{
                 position: absolute;
                 /*float: left;*/
                 z-index:2000;
-                opacity: 0.7;
+                opacity: 0.8;
                 left:150px;
                 top: 40px;
                 display: none;
@@ -91,7 +88,8 @@
 
             #image_panel {
                 float:left;
-                width:900px;
+                /*CHANGE HERE*/
+                width:100%;
                 margin: auto;
                 position:relative; /*positioned relative to the main_panel*/
             }
@@ -102,7 +100,8 @@
                 -webkit-border-radius: 6px;
                 -moz-border-radius: 6px;
                 border-radius: 6px;
-                max-width: 900px;
+                /*CHANGE HERE*/
+                max-width: 100%;
                 overflow: hidden;
             }
 
@@ -179,16 +178,18 @@
 
             #tagbuttons {
                  background: none repeat scroll 0 0 #E6E6E6;
-                 border: 1px solid #AEAEAE;
+                 border: 1px solid #EEEEEE;
                  clear: both;
-                 margin: 60px auto;
+                 /*REMOVE
+                 margin: 60px auto;*/
                  padding: 20px 0;
                  border: 1px solid #ccc;
                  -webkit-border-radius: 5px;
                  -moz-border-radius: 5px;
                  border-radius: 6px;
                  text-align: center;
-                 width: 900px;
+                 /*CHANGE HERE*/
+                 width: 100%;
             }
 
         </style>
@@ -352,10 +353,10 @@
 
                 if (client) {
                     client.emit('hidetag', {
-                        tagdbox:$(".tagged_box").css("display","none"),
-                        tagd:$(".tagged").css("border","none"),
-                        tagdtitle:$(".tagged_title").css("display","none"),
-                        tagcontent:$(".tagged_content").css("display","none")
+//                        tagdbox:$(".tagged_box").css("display","none"),
+//                        tagd:$(".tagged").css("border","none"),
+//                        tagdtitle:$(".tagged_title").css("display","none"),
+//                        tagcontent:$(".tagged_content").css("display","none")
                     });
                 }
 
@@ -419,16 +420,18 @@
         // Handler when user joins
         client.on('del', function(obj) {
 
-            $('#connectinfo').append('<p style="color:#10aeb2">'+'Deleted the tag</p>');
+            $('#connectinfo').append('<p style="color:#10aeb2">'+'Deleted a tag</p>');
 //            $('#connectinfo').append('<p style="color:#10aeb2"> by user'+ name + '</p>');
             console.log("OBJ ID in del is " + obj.objid);
             $("#"+ obj.objid).remove(); // locally delete the tag
 
         });
 
-        client.on('hidetag', function (obj) {
-
-            $("#"+ obj.objid).css("display","none"); // locally delete the tag
+        client.on('hidetag', function () {
+            $(".tagged_box").css("display","none");
+            $(".tagged").css("border","none");
+            $(".tagged_title").css("display","none");
+            $(".tagged_content").css("display","none");
         });
 
         // Handler when user sends tag image message
@@ -449,6 +452,8 @@
                 $("#title").val('');
                 $("#content").val('');
                 $("#form_panel").hide();
+
+                $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' Added a tag</p>');
         });
 
         // Handler when user leaves
@@ -462,7 +467,78 @@
 
 
 <!--     <body onload='connect()'>   -->    
- <body>
+ <body style="color:#eeeeee">
+
+       <div class="container">
+            <div class="row clearfix">
+                <div class="col-md-3 column">
+                    <div class="alert alert-success ">
+                        <h2>
+                            Connect here!
+                        </h2> 
+                        
+                     <p> <b>Your Name: </b> <input id="name" type="text" class="form-control"/></p>
+                     <button type="button" class="btn btn-primary btn-block" onclick='connect()'>Connect</button>  
+                    </div>
+                    <div id='connectinfo'></div>
+                </div>
+                <div class="col-md-9 column">
+                    <h3 style="color:#00b4f0 ">
+                        Real-time collaborative image-tagging!
+                    </h3>
+                    <h4 style="color:#00b4f0">
+                        Groupware and Collaborative interaction 2015
+                    </h4>
+                    <h5 style="color:#00b4f0 ">
+                        Jingxiang Gou - Alvi Syahrina<br>
+                        Universite Paris-Sud
+                    </h5>
+
+                
+                    <div id = "tagbuttons">
+                       <button class="btn btn-default" type="button" value="Show Tags" onclick="showTags()" >
+                            Show Tags</button>
+                        <button class="btn btn-danger" type="button" value="Hide Tags" onclick="hideTags()">
+                            Hide Tags</button>
+                    </div>
+                   
+                        <div id='image_panel' >
+                            <img src='code.png' id='imageMap'  >
+                            <img src='gou.jpg' id='imageMap2' >
+                            <div id='mapper' ><img src='save.png' onclick='openDialog()' /></div>
+
+                            <div id="ImageContainer">
+                            </div>
+
+                            <form class="form-horizontal" role="form" id='form_panel'>
+                                <div class="form-group">
+                                    <label for="title" class="col-sm-2 control-label">Title</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="title" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="content" class="col-sm-2 control-label">Content</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="content" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="button" class="btn btn-default" value='Add Tag' onclick='addTag()'>Add Tag</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    
+               </div>
+                
+            </div>
+        </div>
+        
+<!--
         <div class="row clearfix" id="pagetitle">
             <div class="col-md-8 column">
                 <h2 class="text-left" style="color:#92b938">
@@ -551,13 +627,13 @@
 
             </div>
 
-        </div>
+        </div>-->
 
         <!-- infomation panel to show system status -->
-        <div id='connectinfo'></div>
+        <!--<div id='connectinfo'></div>-->
 
 
-        <!--This is the part for uploading image update-->
+        <!--This is the part for uploading image update--><!--
         <div class="container">
             <div class="row clearfix">
                 <div class="col-md-6 column">
@@ -588,7 +664,7 @@
                         <br><br>
                      <input type="submit button" value="Upload" class="btn btn-default"/>
                     </form>
-                </div>
+                </div>-->
 
     </body>
 </html>
