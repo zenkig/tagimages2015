@@ -36,16 +36,27 @@ io.on('connection', function(client) {
 	
 	client.on('msg', function(data) {
 
-		console.log(data);
+		console.log("sendMessageTag MessageTAG:" +data);
 		// Broadcast to others
 		client.broadcast.emit('msg', data);
 	});
 
-	client.on('del', function(data) {
-		console.log(data);
+	client.on('del', function(obj) {
+		console.log("sendDelTag DEL:"+ obj);
 		// Broadcast to others
-		client.broadcast.emit('del', data);		
+		client.broadcast.emit('del', obj);
 	});
+
+    client.on('hidetag', function(data) {
+        console.log("sendHideTag TAG:" + data);
+        //console.log("sendHideTag tagbox:" + data.tagbox);
+        //console.log("sendHideTag tagd:" + data.tagd);
+        //console.log("sendHideTag tagtitle:" + data.tagdtitle);
+        //console.log("sendHideTag tagcontent:" + data.tagdcontent);
+
+        // Broadcast to others
+        client.broadcast.emit('hidetag',data);
+    });
 
 });
 
