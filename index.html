@@ -178,7 +178,7 @@
 
             #tagbuttons {
                  background: none repeat scroll 0 0 #E6E6E6;
-                 border: 1px solid #EEEEEE;
+                 border: 1px solid #2769C4;
                  clear: both;
                  /*REMOVE
                  margin: 60px auto;*/
@@ -287,7 +287,47 @@
                 var img_scope_left = $("#imageMap").offset().left + $("#imageMap").width() - $(this).find(".tagged_box").width();
 
                 $(this).draggable({ 
-                    containment:[$("#imageMap").offset().left,$("#imageMap").offset().top, img_scope_left, img_scope_top]  });
+                    containment:[$("#imageMap").offset().left,$("#imageMap").offset().top, img_scope_left, img_scope_top],
+                    start: function(e, ui) {
+                        console.log('dragging started');
+                        var tagcontainer = $(this).attr("id");
+                        console.log('tagcontainer ID: ' + tagcontainer);
+
+                        if (client) {
+                            client.emit('startdrag', {
+                                objoriginal: $(this).attr("id") // passing to clients the info
+                            });
+                        }
+                    },
+                    stop: function(e, ui) {
+                        console.log('draggable stopped');
+                        var tagdraggedcontainer = $(this).attr("id");
+                        var position = $("#" + tagdraggedcontainer).position();
+                        var pos_x = position.left;
+                        var pos_y = position.top;
+                        var pos_width = $("#" + tagdraggedcontainer).width();
+                        var pos_height = $("#" + tagdraggedcontainer).height();
+
+                        console.log('tagcontainer ID: ' + tagdraggedcontainer);
+
+                        if (client) {
+                            client.emit('stopdrag', {
+                                objdragged: tagdraggedcontainer,  // passing to other clients the new position info
+                                titl: $("#"+tagdraggedcontainer).find('.tagged_title').val(),
+                                msg: $("#"+tagdraggedcontainer).find('tagged_content').val(),
+                                position: $("#"+tagdraggedcontainer).position(),
+                                pos_x: pos_x,
+                                pos_y: pos_y,
+                                pos_width: pos_width,
+                                pos_height: pos_height
+                            });
+                        }
+                        console.log('tagcontainer title: ' +  $(this).find('.tagged_title').val());
+                        console.log('tagcontainer msg: ' +    $(this).find('.tagged_content').val());
+                        console.log('tagcontainer position: ' +  $(this).position());
+
+                    }
+                });
 
             });
 
@@ -340,6 +380,11 @@
 
             var showTags = function(){
 
+                if (client) {
+                    client.emit('showtags', { // no parameter passing here
+                    });
+                }
+
                 $(".tagged_box").css("display","block");
                 $(".tagged").css("border","4px dotted #91e374");
                 $(".tagged_title").css("display","block");
@@ -350,13 +395,8 @@
 
 //                var tagcontainer = $(obj).parent().parent().attr("id");
 
-
                 if (client) {
-                    client.emit('hidetag', {
-//                        tagdbox:$(".tagged_box").css("display","none"),
-//                        tagd:$(".tagged").css("border","none"),
-//                        tagdtitle:$(".tagged_title").css("display","none"),
-//                        tagcontent:$(".tagged_content").css("display","none")
+                    client.emit('hidetags', { // no parameter passing here
                     });
                 }
 
@@ -383,16 +423,25 @@
                 // info clients online
                 if (client) {
                     client.emit('del', {
-                          objid: tagcontainer
+                            objid: tagcontainer
                     });
                 }
 
                 $(obj).parent().parent().remove(); // locally delete the tag
             };
 
+            var deleteoriginalTag = function(data){
+            console.log("obj for the deleteoriginalTag obj: " + data);
+            // info to other client users online
+            if (client) {
+                client.emit('del', {
+                    objid: data.objoriginal
+                });
+            }
+            };
 
 
-        // connect function for node.js
+    // connect function for Node.js
     function connect() {
 
         if (client)
@@ -414,24 +463,29 @@
 
         // Handler when user joins
         client.on('hello', function(name) {
-            $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' joined</p>');
+            $('#connectinfo').append('<p style="color:#10aeb2"> User '+ name +' joined</p>');
         });
 
         // Handler when user joins
         client.on('del', function(obj) {
-
             $('#connectinfo').append('<p style="color:#10aeb2">'+'Deleted a tag</p>');
 //            $('#connectinfo').append('<p style="color:#10aeb2"> by user'+ name + '</p>');
             console.log("OBJ ID in del is " + obj.objid);
             $("#"+ obj.objid).remove(); // locally delete the tag
-
         });
 
-        client.on('hidetag', function () {
+        client.on('hidetags', function () {
             $(".tagged_box").css("display","none");
             $(".tagged").css("border","none");
             $(".tagged_title").css("display","none");
             $(".tagged_content").css("display","none");
+        });
+
+        client.on('showtags', function () {
+            $(".tagged_box").css("display","block");
+            $(".tagged").css("border","4px dotted #91e374");
+            $(".tagged_title").css("display","block");
+            $(".tagged_content").css("display","block");
         });
 
         // Handler when user sends tag image message
@@ -456,9 +510,36 @@
                 $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' Added a tag</p>');
         });
 
+        // Handler when one user dragged the tag (changed the position)on the image
+        client.on('startdrag', function(data) {
+//           deleteoriginalTag(data);  // TODO: change
+      //      $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' Started moving the tag' + data.titl +'</p>');
+        });
+
+        client.on('stopdrag', function(data) {
+
+            var tagstyle = '<div id = "'+ data.objdragged +'"class="tagged"  style="width:'+ data.pos_width+';height:'+
+                    data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
+                    '<div class="tagged_box" style="width:'+ data.pos_width+';height:'+
+                    data.pos_height+';display:none;" ></div>'+
+                    '<div class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
+                    data.titl+'</div>'+
+                    '<div class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
+                    data.msg+'</div>'+
+                    '</div>';
+
+            $('#ImageContainer').append(tagstyle);
+            $("#mapper").hide();
+            $("#title").val('');
+            $("#content").val('');
+            $("#form_panel").hide();
+
+            $('#connectinfo').append('<p style="color:#10aeb2">'+' Repositioned the tag of Title'+ data.titl +'</p>');
+        });
+
         // Handler when user leaves
         client.on('bye', function(name) {
-            $('#connectinfo').append('<p style="color:#ff4162">'+ name +' has left</p>');
+            $('#connectinfo').append('<p style="color:#ff4162"> User '+ name +' has left</p>');
         });
     }       // End of connect
 
@@ -478,7 +559,7 @@
                         </h2> 
                         
                      <p> <b>Your Name: </b> <input id="name" type="text" class="form-control"/></p>
-                     <button type="button" class="btn btn-primary btn-block" onclick='connect()'>Connect</button>  
+                     <button type="button" class="btn btn-primary btn-block" onclick='connect()'> Login </button>
                     </div>
                     <div id='connectinfo'></div>
                 </div>

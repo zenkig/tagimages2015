@@ -47,15 +47,28 @@ io.on('connection', function(client) {
 		client.broadcast.emit('del', obj);
 	});
 
-    client.on('hidetag', function(data) {
+    client.on('hidetags', function(data) {
         console.log("sendHideTag TAG:" + data);
-        //console.log("sendHideTag tagbox:" + data.tagbox);
-        //console.log("sendHideTag tagd:" + data.tagd);
-        //console.log("sendHideTag tagtitle:" + data.tagdtitle);
-        //console.log("sendHideTag tagcontent:" + data.tagdcontent);
-
         // Broadcast to others
-        client.broadcast.emit('hidetag',data);
+        client.broadcast.emit('hidetags',data);
+    });
+
+    client.on('showtags', function(data) {
+        console.log("sendShowTag TAG:" + data);
+        // Broadcast to others
+        client.broadcast.emit('showtags',data);
+    });
+
+    client.on('startdrag', function(data) {
+        console.log("repositioned TAG:" + data);
+        // Broadcast to others
+        client.broadcast.emit('startdrag',data);
+    });
+
+    client.on('stopdrag', function(data) {
+        console.log("repositioned TAG:" + data);
+        // Broadcast to others
+        client.broadcast.emit('stopdrag',data);
     });
 
 });
