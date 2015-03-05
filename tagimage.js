@@ -67,6 +67,7 @@ io.on('connection', function(client) {
 
     client.on('stopdrag', function(data) {
         console.log("repositioned TAG:" + data);
+
         // Broadcast to others
         client.broadcast.emit('stopdrag',data);
     });

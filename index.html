@@ -302,6 +302,7 @@
                     stop: function(e, ui) {
                         console.log('draggable stopped');
                         var tagdraggedcontainer = $(this).attr("id");
+                        var tagpp = $(this).parent().parent().attr("id");
                         var position = $("#" + tagdraggedcontainer).position();
                         var pos_x = position.left;
                         var pos_y = position.top;
@@ -322,9 +323,9 @@
                                 pos_height: pos_height
                             });
                         }
-                        console.log('tagcontainer title: ' +  $(this).find('.tagged_title').val());
-                        console.log('tagcontainer msg: ' +    $(this).find('.tagged_content').val());
-                        console.log('tagcontainer position: ' +  $(this).position());
+                        console.log('tagcontainer title: ' +  $("#"+ tagpp).find(".tagged_title").val());
+                        console.log('tagcontainer msg: ' +    $("#"+tagdraggedcontainer).parent());
+                        console.log('TCON value: ' +    $("#"+tagdraggedcontainer).val());
 
                     }
                 });
@@ -439,7 +440,6 @@
                 });
             }
             };
-
 
     // connect function for Node.js
     function connect() {
@@ -586,7 +586,7 @@
                         <div id='image_panel' >
                             <img src='code.png' id='imageMap'  >
                             <img src='gou.jpg' id='imageMap2' >
-                            <div id='mapper' ><img src='save.png' onclick='openDialog()' /></div>
+                            <div id='mapper' ><img src='save.png' width='25' height ='25' alt = '24*24' onclick='openDialog()' /></div>
 
                             <div id="ImageContainer">
                             </div>
