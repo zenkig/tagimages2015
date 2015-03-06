@@ -281,14 +281,16 @@
 
                 $(this).find(".tagged_box").html(
                         "<img src='delete.png' width='25' height ='25' alt = '24*24' class='openDialog' value='Delete' onclick='deleteTag(this)' />\n\
-                         <img src='save.png' onclick='editTag(this);' value='Save' />");
+                         <img src='save.png' width='25' height ='25' alt = '24*24' onclick='editTag(this);' value='Save' />");
 
                 var img_scope_top = $("#imageMap").offset().top + $("#imageMap").height() - $(this).find(".tagged_box").height();
                 var img_scope_left = $("#imageMap").offset().left + $("#imageMap").width() - $(this).find(".tagged_box").width();
 
                 $(this).draggable({ 
                     containment:[$("#imageMap").offset().left,$("#imageMap").offset().top, img_scope_left, img_scope_top],
+
                     start: function(e, ui) {
+
                         console.log('dragging started');
                         var tagcontainer = $(this).attr("id");
                         console.log('tagcontainer ID: ' + tagcontainer);
@@ -302,20 +304,21 @@
                     stop: function(e, ui) {
                         console.log('draggable stopped');
                         var tagdraggedcontainer = $(this).attr("id");
-                        var tagpp = $(this).parent().parent().attr("id");
                         var position = $("#" + tagdraggedcontainer).position();
                         var pos_x = position.left;
                         var pos_y = position.top;
                         var pos_width = $("#" + tagdraggedcontainer).width();
                         var pos_height = $("#" + tagdraggedcontainer).height();
+                        var tagdraggedtitle = $("#"+ tagdraggedcontainer+".ui-draggable").find(" .tagged_title").text();
+                        var tagdraggedclass = $("#"+ tagdraggedcontainer+".ui-draggable").find(" .tagged_content").text();
 
-                        console.log('tagcontainer ID: ' + tagdraggedcontainer);
+                        console.log('tagcontainer ID: ' + tagdraggedcontainer); //debug ID of tag object 
 
                         if (client) {
                             client.emit('stopdrag', {
                                 objdragged: tagdraggedcontainer,  // passing to other clients the new position info
-                                titl: $("#"+tagdraggedcontainer).find('tagged_title').val(),
-                                msg: $("#"+tagdraggedcontainer).find('tagged_content').val(),
+                                titl: $("#" + tagdraggedcontainer +" .tagged_title").text(),  // TODO
+                                msg:  $("#" + tagdraggedcontainer +" .tagged_content").text(),  // TODO
                                 position: $("#"+tagdraggedcontainer).position(),
                                 pos_x: pos_x,
                                 pos_y: pos_y,
@@ -323,14 +326,19 @@
                                 pos_height: pos_height
                             });
                         }
-                        console.log('tagcontainer title: ' +  $("#"+ tagpp).find(".tagged_title").val());
-                        console.log('tagcontainer msg: ' +    $("#"+tagdraggedcontainer).parent());
-                        console.log('TCON value: ' +    $("#"+tagdraggedcontainer).val());
-
+                        console.log('tagcontainer title: ' + $("#"+tagdraggedcontainer + " .tagged_title").text() );
+                        console.log('tagcontainer msg: ' +   $("#"+tagdraggedcontainer + " .tagged_content").text() );   
                     }
+
                 });
 
-            });
+                 $(this).find(".tagged_title").html(
+                    );
+                 $(this).find(".tagged_content").html(
+                    );
+
+
+            });  // end of .tagged  "Click"
 
             //add a TAG on the iamge
             var addTag = function(){
@@ -344,11 +352,11 @@
 
                 var tagstylelocal = '<div id = "'+ time_now +'" class="tagged"  style="width:'+pos_width+';height:'+
                             pos_height+';left:'+pos_x+';top:'+pos_y+';" >' +
-                        '<div class="tagged_box" style="width:'+pos_width+';height:'+
+                        '<div id = "'+ time_now +'" class="tagged_box" style="width:'+pos_width+';height:'+
                             pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(pos_height)+';display:block;" >'+
+                        '<div id = "'+ time_now +'" class="tagged_title" style="top:'+(pos_height)+';display:block;" >'+
                          $("#title").val()+'</div>'+
-                        '<div class="tagged_content" style="top:'+(pos_height+26)+';display:block;" >'+
+                        '<div id = "'+ time_now +'" class="tagged_content" style="top:'+(pos_height+26)+';display:block;" >'+
                          $("#content").val()+'</div>'+
                         '</div>';
 
@@ -435,7 +443,7 @@
             console.log("obj for the deleteoriginalTag obj: " + data);
             // info to other client users online
             if (client) {
-                client.emit('del', {
+                client.emit('delori', {
                     objid: data.objoriginal
                 });
             }
@@ -474,6 +482,13 @@
             $("#"+ obj.objid).remove(); // locally delete the tag
         });
 
+                // Handler when user joins
+        client.on('delori', function(obj) {
+            $('#connectinfo').append('<p style="color:#10aeb2">'+'Deleted a tag</p>');
+            console.log("OBJ ID in del is " + obj.objid);
+            $("#"+ obj.objid).remove().delay(6000); // locally delete the tag
+        });
+
         client.on('hidetags', function () {
             $(".tagged_box").css("display","none");
             $(".tagged").css("border","none");
@@ -492,12 +507,12 @@
         client.on('msg', function(data) {
 
             var tagstyle = '<div id = "'+ data.time_now +'"class="tagged"  style="width:'+data.pos_width+';height:'+
-                            data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
-                        '<div class="tagged_box" style="width:'+ data.pos_width+';height:'+
+                            data.pos_height+';left:'+ data.pos_x +';top:'+ data.pos_y +';" >' +
+                        '<div id = "'+ data.time_now +'"class="tagged_box" style="width:'+ data.pos_width+';height:'+
                             data.pos_height+';display:none;" ></div>'+
-                        '<div class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
+                        '<div id = "'+ data.time_now +'"class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
                             data.titl+'</div>'+
-                        '<div class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
+                        '<div id = "'+ data.time_now +'"class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
                             data.msg+'</div>'+
                         '</div>';
 
@@ -512,28 +527,31 @@
 
         // Handler when one user dragged the tag (changed the position)on the image
         client.on('startdrag', function(data) {
-//           deleteoriginalTag(data);  // TODO: change
+              // deleteoriginalTag(data);  // TODO: change
       //      $('#connectinfo').append('<p style="color:#10aeb2">'+ name +' Started moving the tag' + data.titl +'</p>');
         });
 
         client.on('stopdrag', function(data) {
 
+            console.log("data.titl: "+ data.titl); //debug
+            console.log("data.msg:  "+ data.msg);
+
+
             var tagstyle = '<div id = "'+ data.objdragged +'"class="tagged"  style="width:'+ data.pos_width+';height:'+
                     data.pos_height+';left:'+ data.pos_x+';top:'+ data.pos_y+';" >' +
-                    '<div class="tagged_box" style="width:'+ data.pos_width+';height:'+
+                    '<div id = "'+ data.objdragged +'"class="tagged_box" style="width:'+ data.pos_width+';height:'+
                     data.pos_height+';display:none;" ></div>'+
-                    '<div class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
+                    '<div id = "'+ data.objdragged +'"class="tagged_title" style="top:'+(data.pos_height)+';display:block;" >'+
                     data.titl+'</div>'+
-                    '<div class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
+                    '<div id = "'+ data.objdragged +'"class="tagged_content" style="top:'+(data.pos_height+26)+';display:block;" >'+
                     data.msg+'</div>'+
                     '</div>';
 
-            $('#ImageContainer').append(tagstyle);
+            $('#ImageContainer').html(tagstyle);
             $("#mapper").hide();
-            $("#title").val('');
-            $("#content").val('');
+            // $("#title").val('');
+            // $("#content").val('');
             $("#form_panel").hide();
-
             $('#connectinfo').append('<p style="color:#10aeb2">'+' Repositioned the tag of Title'+ data.titl +'</p>');
         });
 
@@ -586,7 +604,9 @@
                         <div id='image_panel' >
                             <img src='code.png' id='imageMap'  >
                             <img src='gou.jpg' id='imageMap2' >
-                            <div id='mapper' ><img src='save.png' width='25' height ='25' alt = '24*24' onclick='openDialog()' /></div>
+                            <div id='mapper' >
+                                <img src='save.png' width='25' height ='25' alt = '24*24' onclick='openDialog()' />
+                            </div>
 
                             <div id="ImageContainer">
                             </div>
